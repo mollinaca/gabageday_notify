@@ -1,3 +1,3 @@
-# gabageday_notify
+# garbage_notify
 
-Post to your Slack about your gabage collected day 🗑
+Post to your Slack about your garbage collected day 🗑
