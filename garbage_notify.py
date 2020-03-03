@@ -30,6 +30,7 @@ elif weekday == 4:
     if (today <= 8 and today <= 14) or (today <= 22 and today <= 28):
         garbage_day = "金属・陶器・ガラスごみ（第2/第4 金）"
 else:
+    print ('tommorow is not garbage collected day', file=sys.stderr)
     exit (0)
 
 # Post to slack
