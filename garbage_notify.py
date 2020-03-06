@@ -22,11 +22,11 @@ weekday = datetime.date.today().weekday()
 today = datetime.datetime.now().day
 #print (weekday)
 #print (today)
-if weekday == 7 or weekday == 2:
+if weekday == 6 or weekday == 2:
     garbage_day = "燃やすごみ（毎週 月/木）"
-elif weekday == 5:
-    garbage_day = "資源ごみの日（毎週 土）"
 elif weekday == 4:
+    garbage_day = "資源ごみの日（毎週 土）"
+elif weekday == 3:
     if (today <= 8 and today <= 14) or (today <= 22 and today <= 28):
         garbage_day = "金属・陶器・ガラスごみ（第2/第4 金）"
 else:
