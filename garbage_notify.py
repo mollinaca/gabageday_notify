@@ -10,6 +10,7 @@ p = pathlib.Path(__file__).resolve().parent
 config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
 webhook = config['slack']['webhook']
+webhook_dev = config['slack']['webhook_dev']
 
 """
 ゴミ出し通知くん
@@ -20,8 +21,7 @@ webhook = config['slack']['webhook']
 
 weekday = datetime.date.today().weekday()
 today = datetime.datetime.now().day
-#print (weekday)
-#print (today)
+#weekday = "test"
 if weekday == 6 or weekday == 2:
     garbage_day = "燃やすごみ（毎週 月/木）"
 elif weekday == 4:
@@ -29,13 +29,19 @@ elif weekday == 4:
 elif weekday == 3:
     if (today <= 8 and today <= 14) or (today <= 22 and today <= 28):
         garbage_day = "金属・陶器・ガラスごみ（第2/第4 金）"
+elif weekday == "test":
+    print ('post test mode')
+    garbage_day = "post test mode"
 else:
     print ('tommorow is not garbage collected day', file=sys.stderr)
     exit (0)
 
 # Post to slack
 message = "明日は " + garbage_day + " の日です 🗑"
-url=webhook
+url = webhook
+#if weekday == "test":
+#    url = webhook_dev
+
 data = {
     'text': message
 }
