@@ -9,8 +9,8 @@ import json
 p = pathlib.Path(__file__).resolve().parent
 config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
-webhook = config['garbage notify']['webhook']
-webhook_dev = config['garbage notify']['webhook_dev']
+webhook = config['garbage_notify']['webhook']
+webhook_dev = config['garbage_notify']['webhook_dev']
 
 """
 ゴミ出し通知くん
