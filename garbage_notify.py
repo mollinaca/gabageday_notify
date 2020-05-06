@@ -9,8 +9,8 @@ import json
 p = pathlib.Path(__file__).resolve().parent
 config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
-webhook = config['slack']['webhook']
-webhook_dev = config['slack']['webhook_dev']
+webhook = config['garbage notify']['webhook']
+webhook_dev = config['garbage notify']['webhook_dev']
 
 """
 ゴミ出し通知くん
