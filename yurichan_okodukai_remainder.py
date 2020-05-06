@@ -18,8 +18,6 @@ webhook_dev = config['yurichan_okodukai_remainder']['webhook_dev']
 okodukai = config['yurichan_okodukai_remainder']['okodukai']
 
 today = datetime.datetime.now().day
-print (today,type(today))
-today = 15
 if today != 15:
     print ("今日は15日ではないのです。")
     exit (0)
