@@ -24,7 +24,7 @@ if today != 15:
 
 
 # Post to slack
-message = "15日です。ゆりちゃんにお小遣いを振り込みましょう。今月のお小遣いは " + okodukai + " 円です。\nただし、2020年4月~6月分は支給済みです。"
+message = "15日です。ゆりちゃんにお小遣いを振り込みましょう。今月のお小遣いは " + okodukai + " 円です。"
 url = webhook
 #url = webhook_dev
 
