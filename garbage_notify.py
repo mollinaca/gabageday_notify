@@ -27,7 +27,7 @@ if weekday == 6 or weekday == 2:
 elif weekday == 4:
     garbage_day = "資源ごみの日（毎週 土）"
 elif weekday == 3:
-    if (today <= 8 and today <= 14) or (today <= 22 and today <= 28):
+    if (8 <= today and today <= 14) or (22 <= today and today <= 28):
         garbage_day = "金属・陶器・ガラスごみ（第2/第4 金）"
 elif weekday == "test":
     print ('post test mode')
