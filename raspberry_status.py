@@ -24,7 +24,6 @@ message = '```[' + hostname.stdout.rstrip() + ']' + uptime.stdout \
     + temp.stdout \
     + volt.stdout \
     + '```'
-print (message)
 
 # Post to slack
 data = {
