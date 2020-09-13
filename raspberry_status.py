@@ -15,10 +15,16 @@ config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
 webhook = config['raspberry']['webhook']
 
-hostname = subprocess.run(['hostname'], encoding='utf-8', stdout=subprocess.PIPE)
-uptime = subprocess.run(['uptime'], encoding='utf-8', stdout=subprocess.PIPE)
-message = hostname.stdout + uptime.stdout
-url = webhook
+hostname = subprocess.run(['hostname'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+uptime = subprocess.run(['uptime'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+temp = subprocess.run(['vcgencmd', 'measure_temp'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+volt = subprocess.run(['vcgencmd', 'measure_volts'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+message = '```[' + hostname.stdout.rstrip() + ']' + uptime.stdout \
+    + temp.stdout \
+    + volt.stdout \
+    + '```'
+print (message)
 
 # Post to slack
 data = {
@@ -29,6 +35,7 @@ headers = {
     'Content-Type': 'application/json',
 }
 
-req = urllib.request.Request(url, json.dumps(data).encode(), headers)
+req = urllib.request.Request(webhook, json.dumps(data).encode(), headers)
 with urllib.request.urlopen(req) as res:
     body = res.read().decode('utf-8')
+
