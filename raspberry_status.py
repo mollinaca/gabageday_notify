@@ -3,11 +3,11 @@
 """
 raspberryPi から 健康状態をSlackへPOSTする
 """
-import sys
 import pathlib
 import configparser
 import urllib.request
 import json
+import socket
 import subprocess
 
 p = pathlib.Path(__file__).resolve().parent
@@ -15,14 +15,18 @@ config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
 webhook = config['raspberry']['webhook']
 
-hostname = subprocess.run(['hostname'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+hostname = socket.gethostname()
 uptime = subprocess.run(['uptime'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-temp = subprocess.run(['vcgencmd', 'measure_temp'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-volt = subprocess.run(['vcgencmd', 'measure_volts'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+temp1 = subprocess.Popen(['vcgencmd', 'measure_temp'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+temp = temp1.communicate()[0].decode('utf-8')
+ip_addr1 = subprocess.Popen(['ip', 'addr', 'show', 'wlan0'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+ip_addr2 = subprocess.Popen(['grep', '-w', 'inet'], stdin=ip_addr1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+ip_addr3 = subprocess.Popen(['awk', '{print $2}'], stdin=ip_addr2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+ip_addr = ip_addr3.communicate()[0].decode('utf-8')
 
-message = '```[' + hostname.stdout.rstrip() + ']' + uptime.stdout \
-    + temp.stdout \
-    + volt.stdout \
+message = '```[' + hostname + ']' + uptime.stdout \
+    + temp \
+    + 'wlan0: ' + ip_addr \
     + '```'
 
 # Post to slack
@@ -38,3 +42,4 @@ req = urllib.request.Request(webhook, json.dumps(data).encode(), headers)
 with urllib.request.urlopen(req) as res:
     body = res.read().decode('utf-8')
 
+print (body)
