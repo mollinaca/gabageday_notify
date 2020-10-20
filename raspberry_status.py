@@ -14,6 +14,7 @@ p = pathlib.Path(__file__).resolve().parent
 config = configparser.ConfigParser()
 config.read(str(p)+'/setting.ini')
 webhook = config['raspberry']['webhook']
+nic = 'bond0'
 
 hostname = socket.gethostname()
 uptime = subprocess.run(['uptime'], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -26,7 +27,7 @@ ip_addr = ip_addr3.communicate()[0].decode('utf-8')
 
 message = '```[' + hostname + ']' + uptime.stdout \
     + temp \
-    + 'wlan0: ' + ip_addr \
+    + nic + ': ' + ip_addr \
     + '```'
 
 # Post to slack
