@@ -14,21 +14,23 @@ webhook_dev = config['garbage_notify']['webhook_dev']
 
 """
 ゴミ出し通知くん
- 燃やすごみ：月、木
- 資源ごみ：土
- 金属・陶器・ガラスごみ：第2・第4 金
+ 燃えるゴミ   ： 火、金
+ 燃えないゴミ ： 木
+ 資源物１類   ： 水
+ 資源物２類   ： 木
+ 有害危険ゴミ ： 木
 """
 
 weekday = datetime.date.today().weekday()
 today = datetime.datetime.now().day
+garbage_day = ''
 #weekday = "test"
-if weekday == 6 or weekday == 2:
-    garbage_day = "燃やすごみ（毎週 月/木）"
-elif weekday == 4:
-    garbage_day = "資源ごみの日（毎週 土）"
-elif weekday == 3:
-    if (8 <= today and today <= 14) or (22 <= today and today <= 28):
-        garbage_day = "金属・陶器・ガラスごみ（第2/第4 金）"
+if weekday == 0 or weekday == 3:
+    garbage_day = '燃えるごみ'
+elif weekday == 1:
+    garbage_day = '資源物1類(びん、かん、ペットボトル、食品包装プラ等)'
+elif weekday == 2:
+    garbage_day = '燃えないごみ、資源２類(古紙、繊維)、有害ゴミ'
 elif weekday == "test":
     print ('post test mode')
     garbage_day = "post test mode"
