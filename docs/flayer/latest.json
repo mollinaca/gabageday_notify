@@ -5,5 +5,13 @@
         "meetmeet",
         "supervalue"
     ],
-    "detail": {}
+    "detail": {
+        "yorkmart": {
+            "updated_at": "20210102_132241",
+            "flayers": [
+                "https://www.york-inc.com/ul-files/0102_201_A-scaled.jpg",
+                "https://www.york-inc.com/ul-files/0102_201_B-scaled.jpg"
+            ]
+        }
+    }
 }
