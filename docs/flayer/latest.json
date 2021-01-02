@@ -1,13 +1,18 @@
 {
-    "updated_at": "20210102_124928",
-    "flayers": [
-        {
+    "updated_at": "20210102_130850",
+    "stores": [
+        "yorkmart",
+        "meetmett",
+        "supervalue"
+    ],
+    "detail": {
+        "yorkmart": {
             "name": "yorkmart",
-            "updated_at": "20210102_124928",
+            "updated_at": "20210102_130850",
             "flayers": [
                 "https://www.york-inc.com/ul-files/0102_201_A-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0102_201_B-scaled.jpg"
             ]
         }
-    ]
+    }
 }
