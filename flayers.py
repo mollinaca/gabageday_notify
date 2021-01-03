@@ -106,7 +106,7 @@ def main():
 
     SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
     OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + "/docs/flayer/")
-    stores = ['yorkmart', 'meatmeet', 'supervalue', 'gyomusuper']
+    stores = ['yorkmart', 'meatmeet', 'gyomusuper',  'supervalue']
     isNew = False
 
     ### 前回取得した情報 (latest.json) を再取得
@@ -150,7 +150,7 @@ def main():
                 print (" -> flayers not renewed")
             else:
                 print (" -> got new flayers!")
-                pf['detail']['yorkmart'] = y
+                pf['detail']['meetmeat'] = m
                 isNew = True
 
                 # img ファイルを取得
