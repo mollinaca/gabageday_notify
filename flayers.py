@@ -3,13 +3,30 @@
 """
 よくいくスーパーのチラシをスクレイピングで取得して更新があればSlackにPOSTする
 """
+import sys, os
 import pathlib
 import requests
+import urllib.request
+import configparser
 import json
-import datetime
+import datetime, time
 import git
 from bs4 import BeautifulSoup
 
+def files_upload (token:str, channel:str, f:str, comment:str):
+    url = "https://slack.com/api/files.upload"
+    files = {'file': open(f, 'rb')}
+    data = {
+        'token': token,
+        'channels': channel,
+        'filename': f,
+        'initial_comment': comment,
+        'filetype': "jpg"
+    }
+    res = requests.post(url, data=data, files=files)
+    return res
+
+# functions
 def prev_flayer () -> dict:
     """
     前回取得したチラシ情報を取得
@@ -19,13 +36,9 @@ def prev_flayer () -> dict:
 
     return res
 
-def post_to_slack (store:str, urls:list) -> None:
-    """
-    Slack へ POST する
-    """
-    print ("post to slack:", store, urls)
-
-    return None
+def dl (url:str, title:str) -> str:
+    urllib.request.urlretrieve(url,"{0}".format(title))
+    return title
 
 def york () -> dict:
     """
@@ -49,30 +62,61 @@ def york () -> dict:
 
     return ret
 
+
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
+    p = pathlib.Path(__file__).resolve().parent
+    config = configparser.ConfigParser()
+    config.read(str(p)+'/setting.ini')
+    token = config['flayers']['token']
+    channel = config['flayers']['channel']
+
     SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
     OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + "/docs/flayer/")
-    stores = ['yorkmart', 'meetmeet', 'supervalue']
+    stores = ['yorkmart', 'meatmeet', 'supervalue', 'gyomusuper']
     isNew = False
 
     ### 前回取得した情報 (latest.json) を再取得
     pf = prev_flayer ()
 
-    ### チラシ取得処理 ###
+    ### 店ごとの処理 ###
     for store in stores:
-        if store == 'yorkmart':
+        if store == 'yorkmart': # ヨークマート
+            print (store)
             y = york ()
             if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
-                pass
+                print (" -> flayers not renewed")
             else:
+                print (" -> got new flayers!")
+
                 pf['detail']['yorkmart'] = y
                 isNew = True
-            post_to_slack (store, y['flayers'])
-        elif store == 'meetmeet':
+
+                # img ファイルを取得
+                for flayer_url in y['flayers']:
+                    filename = flayer_url.split("/")[-1]
+                    comment = flayer_url
+                    dl (flayer_url, filename)
+
+                    # Slack へPOSTする
+                    res = files_upload (token, channel, filename, comment)
+                    if not res.status_code == 200:
+                        time.sleep (61) # 61秒 sleep してリトライ
+                        ret = files_upload (token, channel, filename, comment)
+                        if not res.status_code == 200:
+                            print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                    else:
+                        pass
+
+                    # ファイルをローカルから削除
+                    os.remove (filename)
+
+        elif store == 'meatmeet': # ミートミート
             pass
-        elif store == 'supervalue':
+        elif store == 'supervalue': # スーパーバリュー
+            pass
+        elif store =="gyomusuper" : # 業務スーパー
             pass
         else:
             pass
