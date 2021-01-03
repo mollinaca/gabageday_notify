@@ -49,19 +49,51 @@ def york () -> dict:
     # 最新のチラシのファイル名を取得
     york_url = "https://www.york-inc.com"
     load_url = york_url + "/store/%e5%a4%a7%e5%ae%ae%e5%8d%97%e4%b8%ad%e9%87%8e%e5%ba%97.html"
-
     res = requests.get(load_url)
     html = BeautifulSoup(res.content, "html.parser")
     leaflet = html.find_all(class_='leaflet pc')
-
     flayer_uri = leaflet[0].findAll('img')[0]['src']
     flayer_a = york_url + flayer_uri
     flayer_b = york_url + flayer_uri.replace('A','B')
     yorkmart_flayers = [flayer_a,flayer_b]
+
     ret = {'updated_at':dt_now, 'flayers':yorkmart_flayers}
 
     return ret
 
+def meatmeet () -> dict:
+    """
+    ミートミート木崎のチラシ情報
+    """
+    dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    # 最新のチラシのファイル名を取得
+
+    # チラシページURLを取得
+    tokubai_url = "https://tokubai.co.jp"
+    meatmeet_url = tokubai_url + "/MEATMeet%E9%A3%9F%E8%82%89%E5%8D%B8%E5%A3%B2%E3%82%BB%E3%83%B3%E3%82%BF%E3%83%BC/174289"
+    res = requests.get(meatmeet_url)
+    html = BeautifulSoup(res.content, "html.parser")
+    leaflet_page_url = tokubai_url + html.find(class_='image_element').get('href')
+
+    # チラシページのチラシページリンクURL（複数）を取得
+    res = requests.get(leaflet_page_url)
+    html = BeautifulSoup(res.content, "html.parser")
+
+    leaflet_page_link = html.find_all(class_="other_leaflet_link")
+    leaflet_page_links = []
+    for l in leaflet_page_link:
+        leaflet_page_links.append(tokubai_url + l.get('href'))
+
+    # 各チラシページリンクURLを開いて、チラシの画像ファイルURLを取得
+    leaflet_links = []
+    for page in leaflet_page_links:
+        res = requests.get(page)
+        html = BeautifulSoup(res.content, "html.parser")
+        leaflet_links.append(html.find(class_='leaflet').get('src').split("?")[0])
+
+    ret = {'updated_at':dt_now, 'flayers':leaflet_links}
+    return ret
 
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -89,7 +121,6 @@ def main():
                 print (" -> flayers not renewed")
             else:
                 print (" -> got new flayers!")
-
                 pf['detail']['yorkmart'] = y
                 isNew = True
 
@@ -113,7 +144,34 @@ def main():
                     os.remove (filename)
 
         elif store == 'meatmeet': # ミートミート
-            pass
+            print (store)
+            m = meatmeet ()
+            if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
+                print (" -> flayers not renewed")
+            else:
+                print (" -> got new flayers!")
+                pf['detail']['yorkmart'] = y
+                isNew = True
+
+                # img ファイルを取得
+                for flayer_url in m['flayers']:
+                    filename = flayer_url.split("/")[-1]
+                    comment = flayer_url
+                    dl (flayer_url, filename)
+
+                    # Slack へPOSTする
+                    res = files_upload (token, channel, filename, comment)
+                    if not res.status_code == 200:
+                        time.sleep (61) # 61秒 sleep してリトライ
+                        ret = files_upload (token, channel, filename, comment)
+                        if not res.status_code == 200:
+                            print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                    else:
+                        pass
+
+                    # ファイルをローカルから削除
+                    os.remove (filename)
+
         elif store == 'supervalue': # スーパーバリュー
             pass
         elif store =="gyomusuper" : # 業務スーパー
