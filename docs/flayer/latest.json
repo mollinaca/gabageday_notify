@@ -1,9 +1,8 @@
 {
-    "updated_at": "20210103_133637",
+    "updated_at": "20210103_134251",
     "stores": [
         "yorkmart",
         "meetmeet",
-        "gyomusuper",
         "supervalue"
     ],
     "detail": {
@@ -12,6 +11,13 @@
             "flayers": [
                 "https://www.york-inc.com/ul-files/0102_201_A-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0102_201_B-scaled.jpg"
+            ]
+        },
+        "meetmeat": {
+            "updated_at": "20210103_134252",
+            "flayers": [
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3774048.jpg",
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3774051.jpg"
             ]
         }
     }
