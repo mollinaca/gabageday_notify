@@ -14,6 +14,9 @@ import git
 from bs4 import BeautifulSoup
 
 def files_upload (token:str, channel:str, f:str, comment:str):
+    """
+    Slackチャンネルへファイルをアップロードする
+    """
     url = "https://slack.com/api/files.upload"
     files = {'file': open(f, 'rb')}
     data = {
@@ -26,7 +29,16 @@ def files_upload (token:str, channel:str, f:str, comment:str):
     res = requests.post(url, data=data, files=files)
     return res
 
-# functions
+def iw (webhook:str, message:str):
+    """
+    SlackチャンネルへIncomingWebhookを使ってメッセージをポストする
+    """
+    data = json.dumps({
+    "text" : message
+    })
+    res = requests.post(webhook, data)
+    return res
+
 def prev_flayer () -> dict:
     """
     前回取得したチラシ情報を取得
@@ -102,7 +114,13 @@ def main():
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
     token = config['flayers']['token']
+    webhook = config['flayers']['webhook']
     channel = config['flayers']['channel']
+
+    # 動作確認用
+    m = "[動作確認用] flayers.py を実行しました dt: " + dt_now
+    res = iw (webhook, m)
+    # 動作確認用ここまで
 
     SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
     OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + "/docs/flayer/")
@@ -119,6 +137,8 @@ def main():
             y = york ()
             if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
                 print (" -> flayers not renewed")
+                text = "[動作確認用] yorkmart のチラシは更新されていませんでいした"
+                iw (webhook, text)
             else:
                 print (" -> got new flayers!")
                 pf['detail']['yorkmart'] = y
@@ -148,6 +168,8 @@ def main():
             m = meatmeet ()
             if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
                 print (" -> flayers not renewed")
+                text = "[動作確認用] meatmeet のチラシは更新されていませんでいした"
+                iw (webhook, text)
             else:
                 print (" -> got new flayers!")
                 pf['detail']['meetmeat'] = m
@@ -178,6 +200,7 @@ def main():
             pass
         else:
             pass
+
 
     if isNew:
         # ファイルを更新
