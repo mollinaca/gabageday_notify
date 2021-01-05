@@ -115,11 +115,13 @@ def main():
     config.read(str(p)+'/setting.ini')
     token = config['flayers']['token']
     webhook = config['flayers']['webhook']
+    webhook_dev = config['flayers']['webhook_dev']
     channel = config['flayers']['channel']
+#    channel_dev = config['flayers']['channel_dev']
 
     # 動作確認用
     m = "[動作確認用] flayers.py を実行しました dt: " + dt_now
-    res = iw (webhook, m)
+    res = iw (webhook_dev, m)
     # 動作確認用ここまで
 
     SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
@@ -137,10 +139,13 @@ def main():
             y = york ()
             if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
                 print (" -> flayers not renewed")
-                text = "[動作確認用] yorkmart のチラシは更新されていませんでいした"
-                iw (webhook, text)
+                text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                iw (webhook_dev, text)
             else:
                 print (" -> got new flayers!")
+                text = store + "の新しいチラシを取得しました！"
+                iw (webhook, text)
+                iw (webhook_dev, text)
                 pf['detail']['yorkmart'] = y
                 isNew = True
 
@@ -168,10 +173,14 @@ def main():
             m = meatmeet ()
             if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
                 print (" -> flayers not renewed")
-                text = "[動作確認用] meatmeet のチラシは更新されていませんでいした"
-                iw (webhook, text)
+                text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                iw (webhook_dev, text)
             else:
                 print (" -> got new flayers!")
+                text = " のチラシは更新されていませんでいした"
+                text = store + "の新しいチラシを取得しました！"
+                iw (webhook, text)
+                iw (webhook_dev, text)
                 pf['detail']['meetmeat'] = m
                 isNew = True
 
