@@ -4,6 +4,7 @@
 よくいくスーパーのチラシをスクレイピングで取得して更新があればSlackにPOSTする
 """
 import sys, os
+import traceback
 import pathlib
 import requests
 import urllib.request
@@ -109,7 +110,6 @@ def meatmeet () -> dict:
 
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
     p = pathlib.Path(__file__).resolve().parent
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
@@ -119,113 +119,117 @@ def main():
     channel = config['flayers']['channel']
 #    channel_dev = config['flayers']['channel_dev']
 
-    # 動作確認用
-    m = "[動作確認用] flayers.py を実行しました dt: " + dt_now
-    res = iw (webhook_dev, m)
-    # 動作確認用ここまで
+    try:
+        # 動作確認用
+        m = "[動作確認用] flayers.py を実行しました dt: " + dt_now
+        res = iw (webhook_dev, m)
+        # 動作確認用ここまで
 
-    SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
-    OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + "/docs/flayer/")
-    stores = ['yorkmart', 'meatmeet', 'gyomusuper',  'supervalue']
-    isNew = False
+        SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+        OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + "/docs/flayer/")
+        stores = ['yorkmart', 'meatmeet', 'gyomusuper',  'supervalue']
+        isNew = False
 
-    ### 前回取得した情報 (latest.json) を再取得
-    pf = prev_flayer ()
+        ### 前回取得した情報 (latest.json) を再取得
+        pf = prev_flayer ()
 
-    ### 店ごとの処理 ###
-    for store in stores:
-        if store == 'yorkmart': # ヨークマート
-            print (store)
-            y = york ()
-            if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
-                print (" -> flayers not renewed")
-                text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
-                iw (webhook_dev, text)
-            else:
-                print (" -> got new flayers!")
-                text = store + "の新しいチラシを取得しました！"
-                iw (webhook, text)
-                iw (webhook_dev, text)
-                pf['detail']['yorkmart'] = y
-                isNew = True
+        ### 店ごとの処理 ###
+        for store in stores:
+            if store == 'yorkmart': # ヨークマート
+                print (store)
+                y = york ()
+                if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
+                    print (" -> flayers not renewed")
+                    text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                    iw (webhook_dev, text)
+                else:
+                    print (" -> got new flayers!")
+                    text = store + "の新しいチラシを取得しました！"
+                    iw (webhook, text)
+                    iw (webhook_dev, text)
+                    pf['detail']['yorkmart'] = y
+                    isNew = True
 
-                # img ファイルを取得
-                for flayer_url in y['flayers']:
-                    filename = flayer_url.split("/")[-1]
-                    comment = flayer_url
-                    dl (flayer_url, filename)
+                    # img ファイルを取得
+                    for flayer_url in y['flayers']:
+                        filename = flayer_url.split("/")[-1]
+                        comment = flayer_url
+                        dl (flayer_url, filename)
 
-                    # Slack へPOSTする
-                    res = files_upload (token, channel, filename, comment)
-                    if not res.status_code == 200:
-                        time.sleep (61) # 61秒 sleep してリトライ
-                        ret = files_upload (token, channel, filename, comment)
+                        # Slack へPOSTする
+                        res = files_upload (token, channel, filename, comment)
                         if not res.status_code == 200:
-                            print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
-                    else:
-                        pass
+                            time.sleep (61) # 61秒 sleep してリトライ
+                            ret = files_upload (token, channel, filename, comment)
+                            if not res.status_code == 200:
+                                print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                        else:
+                            pass
 
-                    # ファイルをローカルから削除
-                    os.remove (filename)
+                        # ファイルをローカルから削除
+                        os.remove (filename)
 
-        elif store == 'meatmeet': # ミートミート
-            print (store)
-            m = meatmeet ()
-            if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
-                print (" -> flayers not renewed")
-                text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
-                iw (webhook_dev, text)
-            else:
-                print (" -> got new flayers!")
-                text = " のチラシは更新されていませんでいした"
-                text = store + "の新しいチラシを取得しました！"
-                iw (webhook, text)
-                iw (webhook_dev, text)
-                pf['detail']['meetmeat'] = m
-                isNew = True
+            elif store == 'meatmeet': # ミートミート
+                print (store)
+                m = meatmeet ()
+                if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
+                    print (" -> flayers not renewed")
+                    text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                    iw (webhook_dev, text)
+                else:
+                    print (" -> got new flayers!")
+                    text = " のチラシは更新されていませんでいした"
+                    text = store + "の新しいチラシを取得しました！"
+                    iw (webhook, text)
+                    iw (webhook_dev, text)
+                    pf['detail']['meetmeat'] = m
+                    isNew = True
 
-                # img ファイルを取得
-                for flayer_url in m['flayers']:
-                    filename = flayer_url.split("/")[-1]
-                    comment = flayer_url
-                    dl (flayer_url, filename)
+                    # img ファイルを取得
+                    for flayer_url in m['flayers']:
+                        filename = flayer_url.split("/")[-1]
+                        comment = flayer_url
+                        dl (flayer_url, filename)
 
-                    # Slack へPOSTする
-                    res = files_upload (token, channel, filename, comment)
-                    if not res.status_code == 200:
-                        time.sleep (61) # 61秒 sleep してリトライ
-                        ret = files_upload (token, channel, filename, comment)
+                        # Slack へPOSTする
+                        res = files_upload (token, channel, filename, comment)
                         if not res.status_code == 200:
-                            print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
-                    else:
-                        pass
+                            time.sleep (61) # 61秒 sleep してリトライ
+                            ret = files_upload (token, channel, filename, comment)
+                            if not res.status_code == 200:
+                                print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                        else:
+                            pass
 
-                    # ファイルをローカルから削除
-                    os.remove (filename)
+                        # ファイルをローカルから削除
+                        os.remove (filename)
 
-        elif store == 'supervalue': # スーパーバリュー
-            pass
-        elif store =="gyomusuper" : # 業務スーパー
-            pass
-        else:
-            pass
+            elif store == 'supervalue': # スーパーバリュー
+                pass
+            elif store =="gyomusuper" : # 業務スーパー
+                pass
+            else:
+                pass
 
+        if isNew:
+            # ファイルを更新
+            pf['updated_at'] = dt_now
+            OUTPUT_FILE_NAME = "latest.json"
+            OUTPUT_FILE = pathlib.Path(str(OUTPUT_DIR) + "/" + OUTPUT_FILE_NAME)
 
-    if isNew:
-        # ファイルを更新
-        pf['updated_at'] = dt_now
-        OUTPUT_FILE_NAME = "latest.json"
-        OUTPUT_FILE = pathlib.Path(str(OUTPUT_DIR) + "/" + OUTPUT_FILE_NAME)
+            with open(OUTPUT_FILE, mode='w') as f:
+                f.write(json.dumps(pf, indent=4))
 
-        with open(OUTPUT_FILE, mode='w') as f:
-            f.write(json.dumps(pf, indent=4))
+            # git 
+            git_repo= git.Repo(SCRIPT_DIR)
+            git_repo.index.add(str(OUTPUT_FILE))
+            commit_message = "[auto] update " + str(OUTPUT_FILE_NAME)
+            git_repo.index.commit(commit_message)
+            git_repo.remotes.origin.push('HEAD')
 
-        # git 
-        git_repo= git.Repo(SCRIPT_DIR)
-        git_repo.index.add(str(OUTPUT_FILE))
-        commit_message = "[auto] update " + str(OUTPUT_FILE_NAME)
-        git_repo.index.commit(commit_message)
-        git_repo.remotes.origin.push('HEAD')
+    except Exception as e:
+        err_msg = "```" + "[Exception]\n" + str(e) + "\n" + "[StackTrace]" + "\n" + traceback.format_exc() + "```"
+        iw (webhook_dev, err_msg)
 
 if __name__ == "__main__":
     main ()
