@@ -85,24 +85,30 @@ def meatmeet () -> dict:
     # チラシページURLを取得
     tokubai_url = "https://tokubai.co.jp"
     meatmeet_url = tokubai_url + "/MEATMeet%E9%A3%9F%E8%82%89%E5%8D%B8%E5%A3%B2%E3%82%BB%E3%83%B3%E3%82%BF%E3%83%BC/174289"
-    res = requests.get(meatmeet_url)
-    html = BeautifulSoup(res.content, "html.parser")
-    leaflet_page_url = tokubai_url + html.find(class_='image_element').get('href')
-
-    # チラシページのチラシページリンクURL（複数）を取得
-    res = requests.get(leaflet_page_url)
-    html = BeautifulSoup(res.content, "html.parser")
-
+    req = urllib.request.Request(meatmeet_url)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
+    leaflet_page_url = tokubai_url + html.findAll(class_="leaflet_component")[0].find(class_="image_element").get('href')
+    req = urllib.request.Request(leaflet_page_url)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
     leaflet_page_link = html.find_all(class_="other_leaflet_link")
+
+    # チラシページリンクのチラシページリンクURL（複数）を取得
     leaflet_page_links = []
     for l in leaflet_page_link:
-        leaflet_page_links.append(tokubai_url + l.get('href'))
+        leaflet_page_links.append(tokubai_url + l.get('href').split('?')[0])
 
     # 各チラシページリンクURLを開いて、チラシの画像ファイルURLを取得
     leaflet_links = []
-    for page in leaflet_page_links:
-        res = requests.get(page)
-        html = BeautifulSoup(res.content, "html.parser")
+    for url in leaflet_page_links:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as res:
+            body = res.read()
+
+        html = BeautifulSoup(body, "html.parser")
         leaflet_links.append(html.find(class_='leaflet').get('src').split("?")[0])
 
     ret = {'updated_at':dt_now, 'flayers':leaflet_links}
@@ -117,7 +123,7 @@ def main():
     webhook = config['flayers']['webhook']
     webhook_dev = config['flayers']['webhook_dev']
     channel = config['flayers']['channel']
-    channel_dev = config['flayers']['channel_dev']
+#    channel_dev = config['flayers']['channel_dev']
 
     try:
         # 動作確認用
@@ -145,7 +151,7 @@ def main():
                 else:
                     print (" -> got new flayers!")
                     text = store + "の新しいチラシを取得しました！"
-                    #iw (webhook, text)
+                    iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['yorkmart'] = y
                     isNew = True
@@ -157,10 +163,10 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel_dev, filename, comment)
+                        res = files_upload (token, channel, filename, comment)
                         if not res.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel_dev, filename, comment)
+                            ret = files_upload (token, channel, filename, comment)
                             if not res.status_code == 200:
                                 print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
@@ -178,7 +184,6 @@ def main():
                     iw (webhook_dev, text)
                 else:
                     print (" -> got new flayers!")
-                    text = " のチラシは更新されていませんでいした"
                     text = store + "の新しいチラシを取得しました！"
                     iw (webhook, text)
                     iw (webhook_dev, text)
@@ -197,7 +202,7 @@ def main():
                             time.sleep (61) # 61秒 sleep してリトライ
                             ret = files_upload (token, channel, filename, comment)
                             if not res.status_code == 200:
-                                print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                                print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
                             pass
 
@@ -210,9 +215,6 @@ def main():
                 pass
             else:
                 pass
-
-        
-        exit ()
 
         if isNew:
             # ファイルを更新
