@@ -65,13 +65,13 @@ def york () -> dict:
     res = requests.get(load_url)
     html = BeautifulSoup(res.content, "html.parser")
     leaflet = html.find_all(class_='leaflet pc')
-    flayer_uri = leaflet[0].findAll('img')[0]['src']
-    flayer_a = york_url + flayer_uri
-    flayer_b = york_url + flayer_uri.replace('A','B')
-    yorkmart_flayers = [flayer_a,flayer_b]
+    yorkmart_flayers = []
+    for l in leaflet:
+        for l2 in list(l.findAll('img')[0].get('data-set').split(',')):
+            if "ul-files" in l2:
+                yorkmart_flayers.append(york_url + l2)
 
     ret = {'updated_at':dt_now, 'flayers':yorkmart_flayers}
-
     return ret
 
 def meatmeet () -> dict:
@@ -117,7 +117,7 @@ def main():
     webhook = config['flayers']['webhook']
     webhook_dev = config['flayers']['webhook_dev']
     channel = config['flayers']['channel']
-#    channel_dev = config['flayers']['channel_dev']
+    channel_dev = config['flayers']['channel_dev']
 
     try:
         # 動作確認用
@@ -145,7 +145,7 @@ def main():
                 else:
                     print (" -> got new flayers!")
                     text = store + "の新しいチラシを取得しました！"
-                    iw (webhook, text)
+                    #iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['yorkmart'] = y
                     isNew = True
@@ -157,12 +157,12 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel, filename, comment)
+                        res = files_upload (token, channel_dev, filename, comment)
                         if not res.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel, filename, comment)
+                            ret = files_upload (token, channel_dev, filename, comment)
                             if not res.status_code == 200:
-                                print ("[error] requests response not 200 OK ->", ret.headers['status'], filename, file=sys.stderr)
+                                print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
                             pass
 
@@ -210,6 +210,9 @@ def main():
                 pass
             else:
                 pass
+
+        
+        exit ()
 
         if isNew:
             # ファイルを更新
