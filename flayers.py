@@ -187,7 +187,7 @@ def main():
                     text = store + "の新しいチラシを取得しました！"
                     #iw (webhook, text)
                     iw (webhook_dev, text)
-                    pf['detail']['meetmeat'] = m
+                    pf['detail']['meatmeet'] = m
                     isNew = True
 
                     # img ファイルを取得
