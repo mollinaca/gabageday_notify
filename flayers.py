@@ -114,6 +114,47 @@ def meatmeet () -> dict:
     ret = {'updated_at':dt_now, 'flayers':leaflet_links}
     return ret
 
+def gyomusuper () -> dict:
+    """
+    業務スーパー 浦和花月（関東）のチラシ
+    """
+    dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    # 最新のチラシのファイル名を取得
+
+    # チラシページURLを取得
+    tokubai_url = "https://tokubai.co.jp"
+    gs_url = tokubai_url + "/%E6%A5%AD%E5%8B%99%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC/169887"
+    req = urllib.request.Request(gs_url)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
+    leaflet_page_url = tokubai_url + html.findAll(class_="leaflet_component")[0].find(class_="image_element").get('href')
+    req = urllib.request.Request(leaflet_page_url)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
+    leaflet_page_link = html.find_all(class_="other_leaflet_link")
+
+    # チラシページリンクのチラシページリンクURL（複数）を取得
+    leaflet_page_links = []
+    for l in leaflet_page_link:
+        leaflet_page_links.append(tokubai_url + l.get('href').split('?')[0])
+
+    # 各チラシページリンクURLを開いて、チラシの画像ファイルURLを取得
+    leaflet_links = []
+    for url in leaflet_page_links:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req) as res:
+            body = res.read()
+
+        html = BeautifulSoup(body, "html.parser")
+        leaflet_links.append(html.find(class_='leaflet').get('src').split("?")[0])
+
+    ret = {'updated_at':dt_now, 'flayers':leaflet_links}
+    return ret
+
+
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     p = pathlib.Path(__file__).resolve().parent
@@ -216,7 +257,42 @@ def main():
             elif store == 'supervalue': # スーパーバリュー
                 pass
             elif store =="gyomusuper" : # 業務スーパー
-                pass
+                print (store)
+                gs = gyomusuper ()
+                if ('gyomusuper' in pf['detail']) and set(gs['flayers']) == set(pf['detail']['meatmeet']['flayers']):
+                    print (" -> flayers not renewed")
+                    text = "[動作確認用] " + store + " のチラシは更新されていませんでいした"
+                    iw (webhook_dev, text)
+                else:
+                    print (" -> got new flayers!")
+                    text = store + " の新しいチラシを取得しました！"
+                    iw (webhook, text)
+                    iw (webhook_dev, text)
+                    pf['detail']['gyomusuper'] = m
+                    isNew = True
+
+                    # img ファイルを取得
+                    for flayer_url in gs['flayers']:
+                        filename = flayer_url.split("/")[-1]
+                        comment = flayer_url
+                        dl (flayer_url, filename)
+
+                        # Slack へPOSTする
+                        res = files_upload (token, channel, filename, comment)
+                        #res = files_upload (token, channel_dev, filename, comment)
+                        if not res.status_code == 200:
+                            time.sleep (61) # 61秒 sleep してリトライ
+                            ret = files_upload (token, channel, filename, comment)
+                            #ret = files_upload (token, channel_dev, filename, comment)
+                            if not res.status_code == 200:
+                                print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
+                        else:
+                            pass
+
+                        # ファイルをローカルから削除
+                        os.remove (filename)
+
+
             else:
                 pass
 
