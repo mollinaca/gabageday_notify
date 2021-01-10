@@ -123,7 +123,7 @@ def main():
     webhook = config['flayers']['webhook']
     webhook_dev = config['flayers']['webhook_dev']
     channel = config['flayers']['channel']
-#    channel_dev = config['flayers']['channel_dev']
+    channel_dev = config['flayers']['channel_dev']
 
     try:
         # 動作確認用
@@ -151,7 +151,7 @@ def main():
                 else:
                     print (" -> got new flayers!")
                     text = store + "の新しいチラシを取得しました！"
-                    iw (webhook, text)
+                    #iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['yorkmart'] = y
                     isNew = True
@@ -163,10 +163,10 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel, filename, comment)
+                        res = files_upload (token, channel_dev, filename, comment)
                         if not res.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel, filename, comment)
+                            ret = files_upload (token, channel_dev, filename, comment)
                             if not res.status_code == 200:
                                 print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
@@ -185,7 +185,7 @@ def main():
                 else:
                     print (" -> got new flayers!")
                     text = store + "の新しいチラシを取得しました！"
-                    iw (webhook, text)
+                    #iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['meetmeat'] = m
                     isNew = True
@@ -197,10 +197,10 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel, filename, comment)
+                        res = files_upload (token, channel_dev, filename, comment)
                         if not res.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel, filename, comment)
+                            ret = files_upload (token, channel_dev, filename, comment)
                             if not res.status_code == 200:
                                 print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
