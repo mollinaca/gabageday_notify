@@ -146,12 +146,12 @@ def main():
                 y = york ()
                 if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
                     print (" -> flayers not renewed")
-                    text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                    text = "[動作確認用] " + store + " のチラシは更新されていませんでいした"
                     iw (webhook_dev, text)
                 else:
                     print (" -> got new flayers!")
-                    text = store + "の新しいチラシを取得しました！"
-                    #iw (webhook, text)
+                    text = store + " の新しいチラシを取得しました！"
+                    iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['yorkmart'] = y
                     isNew = True
@@ -163,11 +163,13 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel_dev, filename, comment)
-                        if not res.status_code == 200:
+                        ret = files_upload (token, channel, filename, comment)
+                        #ret = files_upload (token, channel_dev, filename, comment)
+                        if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel_dev, filename, comment)
-                            if not res.status_code == 200:
+                            ret = files_upload (token, channel, filename, comment)
+                            #ret = files_upload (token, channel_dev, filename, comment)
+                            if not ret.status_code == 200:
                                 print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
                             pass
@@ -180,12 +182,12 @@ def main():
                 m = meatmeet ()
                 if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
                     print (" -> flayers not renewed")
-                    text = "[動作確認用]" + store + "のチラシは更新されていませんでいした"
+                    text = "[動作確認用] " + store + " のチラシは更新されていませんでいした"
                     iw (webhook_dev, text)
                 else:
                     print (" -> got new flayers!")
-                    text = store + "の新しいチラシを取得しました！"
-                    #iw (webhook, text)
+                    text = store + " の新しいチラシを取得しました！"
+                    iw (webhook, text)
                     iw (webhook_dev, text)
                     pf['detail']['meatmeet'] = m
                     isNew = True
@@ -197,10 +199,12 @@ def main():
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        res = files_upload (token, channel_dev, filename, comment)
+                        res = files_upload (token, channel, filename, comment)
+                        #res = files_upload (token, channel_dev, filename, comment)
                         if not res.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel_dev, filename, comment)
+                            ret = files_upload (token, channel, filename, comment)
+                            #ret = files_upload (token, channel_dev, filename, comment)
                             if not res.status_code == 200:
                                 print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
                         else:
