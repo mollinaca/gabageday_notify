@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210111_065947",
+    "updated_at": "20210111_070027",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -17,8 +17,11 @@
             ]
         },
         "meatmeet": {
-            "updated_at": "20210104_081857",
-            "flayers": []
+            "updated_at": "20210111_070029",
+            "flayers": [
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3785358.jpg",
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3785359.jpg"
+            ]
         },
         "meetmeat": {
             "updated_at": "20210110_190004",
