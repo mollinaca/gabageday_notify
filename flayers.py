@@ -169,7 +169,7 @@ def main():
     try:
         # 動作確認用
         m = "[動作確認用] flayers.py を実行しました dt: " + dt_now
-        res = iw (webhook_dev, m)
+        iw (webhook_dev, m)
         # 動作確認用ここまで
 
         SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
@@ -278,17 +278,17 @@ def main():
                         comment = flayer_url
                         dl (flayer_url, filename)
 
-                       # # Slack へPOSTする
-                       # ret = files_upload (token, channel, filename, comment)
-                       # #ret = files_upload (token, channel_dev, filename, comment)
-                       # if not ret.status_code == 200:
-                       #     time.sleep (61) # 61秒 sleep してリトライ
-                       #     ret = files_upload (token, channel, filename, comment)
-                       #     #ret = files_upload (token, channel_dev, filename, comment)
-                       #     if not ret.status_code == 200:
-                       #         print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
-                       # else:
-                       #     pass
+                        # Slack へPOSTする
+                        ret = files_upload (token, channel, filename, comment)
+                        #ret = files_upload (token, channel_dev, filename, comment)
+                        if not ret.status_code == 200:
+                            time.sleep (61) # 61秒 sleep してリトライ
+                            ret = files_upload (token, channel, filename, comment)
+                            #ret = files_upload (token, channel_dev, filename, comment)
+                            if not ret.status_code == 200:
+                                print ("[error] requests response not <200 OK> ->", ret.headers['status'], filename, file=sys.stderr)
+                        else:
+                            pass
 
                         # ファイルをローカルから削除
                         os.remove (filename)
