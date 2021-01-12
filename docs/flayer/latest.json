@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210111_103513",
+    "updated_at": "20210112_190001",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -7,8 +7,10 @@
     ],
     "detail": {
         "yorkmart": {
-            "updated_at": "20210110_100002",
+            "updated_at": "20210112_190002",
             "flayers": [
+                "https://www.york-inc.com/ul-files/0113_201_A-1-scaled.jpg",
+                "https://www.york-inc.com/ul-files/0113_201_B-1-scaled.jpg",
                 "https://www.york-inc.com/ul-files/210108-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0110_202_A-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0110_202_B-scaled.jpg",
