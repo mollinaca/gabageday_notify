@@ -14,7 +14,7 @@ import datetime, time
 import git
 from bs4 import BeautifulSoup
 
-def files_upload (token:str, channel:str, f:str, comment:str):
+def files_upload (token:str, channel_dev:str, f:str, comment:str):
     """
     Slackチャンネルへファイルをアップロードする
     """
@@ -22,7 +22,7 @@ def files_upload (token:str, channel:str, f:str, comment:str):
     files = {'file': open(f, 'rb')}
     data = {
         'token': token,
-        'channels': channel,
+        'channel_devs': channel_dev,
         'filename': f,
         'initial_comment': comment,
         'filetype': 'jpg'
@@ -197,26 +197,25 @@ def main():
                     pf['detail']['yorkmart'] = y
                     isNew = True
 
-                    # img ファイルを取得
                     for flayer_url in y['flayers']:
-                        filename = flayer_url.split('/')[-1]
-                        comment = flayer_url
-                        dl (flayer_url, filename)
+                        if flayer_url not in pf['detail']['yorkmart']['flayers']:
+                            # img ファイルを取得
+                            filename = flayer_url.split('/')[-1]
+                            comment = flayer_url
+                            dl (flayer_url, filename)
 
-                        # Slack へPOSTする
-                        ret = files_upload (token, channel, filename, comment)
-                        #ret = files_upload (token, channel_dev, filename, comment)
-                        if not ret.status_code == 200:
-                            time.sleep (61) # 61秒 sleep してリトライ
+                            # Slack へPOSTする
                             ret = files_upload (token, channel, filename, comment)
                             #ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
-                                print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
-                        else:
-                            pass
+                                time.sleep (61) # 61秒 sleep してリトライ
+                                ret = files_upload (token, channel, filename, comment)
+                                #ret = files_upload (token, channel_dev, filename, comment)
+                                if not ret.status_code == 200:
+                                    print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
 
-                        # ファイルをローカルから削除
-                        os.remove (filename)
+                            # ファイルをローカルから削除
+                            os.remove (filename)
 
             elif store == 'meatmeet': # ミートミート
                 print (store)
@@ -235,24 +234,24 @@ def main():
 
                     # img ファイルを取得
                     for flayer_url in m['flayers']:
-                        filename = flayer_url.split('/')[-1]
-                        comment = flayer_url
-                        dl (flayer_url, filename)
+                        if flayer_url not in pf['detail']['meatmeet']['flayers']:
+                            # img ファイルを取得
+                            filename = flayer_url.split('/')[-1]
+                            comment = flayer_url
+                            dl (flayer_url, filename)
 
-                        # Slack へPOSTする
-                        ret = files_upload (token, channel, filename, comment)
-                        #ret = files_upload (token, channel_dev, filename, comment)
-                        if not ret.status_code == 200:
-                            time.sleep (61) # 61秒 sleep してリトライ
+                            # Slack へPOSTする
                             ret = files_upload (token, channel, filename, comment)
                             #ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
-                                print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
-                        else:
-                            pass
+                                time.sleep (61) # 61秒 sleep してリトライ
+                                ret = files_upload (token, channel, filename, comment)
+                                #ret = files_upload (token, channel_dev, filename, comment)
+                                if not ret.status_code == 200:
+                                    print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
 
-                        # ファイルをローカルから削除
-                        os.remove (filename)
+                            # ファイルをローカルから削除
+                            os.remove (filename)
 
             elif store == 'supervalue': # スーパーバリュー
                 pass
