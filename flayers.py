@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-よくいくスーパーのチラシをスクレイピングで取得して更新があればSlackにPOSTする
+よくいくスーパーのチラシをスクレイピングで取得して更新があればSlackにPOSTするスクリプト
 """
 import sys, os
+import datetime, time
 import traceback
+import json
 import pathlib
+import configparser
 import requests
 import urllib.request
-import configparser
-import json
-import datetime, time
 import git
 from bs4 import BeautifulSoup
 
-def files_upload (token:str, channel_dev:str, f:str, comment:str):
+def files_upload (token:str, channel:str, f:str, comment:str):
     """
     Slackチャンネルへファイルをアップロードする
     """
@@ -22,38 +22,69 @@ def files_upload (token:str, channel_dev:str, f:str, comment:str):
     files = {'file': open(f, 'rb')}
     data = {
         'token': token,
-        'channel_devs': channel_dev,
+        'channels': channel,
         'filename': f,
         'initial_comment': comment,
-        'filetype': 'jpg'
+        'filetype': 'jpg',
+        'file': files
     }
     res = requests.post(url, data=data, files=files)
     return res
 
-def iw (webhook:str, message:str):
+def iw (webhook_url:str, message:str):
     """
     SlackチャンネルへIncomingWebhookを使ってメッセージをポストする
     """
     data = json.dumps({
     'text' : message
     })
-    res = requests.post(webhook, data)
-    return res
-
-def prev_flayer () -> dict:
-    """
-    前回取得したチラシ情報を取得
-    """
-    json_url = 'https://mollinaca.github.io/hstn-family-scripts/flayer/latest.json'
-    res = requests.get(json_url).json()
-
+    res = requests.post(webhook_url, data=data)
     return res
 
 def dl (url:str, title:str) -> str:
+    """
+    ファイルをダウンロードしローカルに保存する
+    """
     urllib.request.urlretrieve(url,'{0}'.format(title))
     return title
 
-def york () -> dict:
+def prev_flayer () -> dict:
+    """
+    前回取得したチラシ情報を取得する
+    """
+    json_url = 'https://mollinaca.github.io/hstn-family-scripts/flayer/latest.json'
+#   json_url = 'https://mollinaca.github.io/hstn-family-scripts/flayer/latest_test.json'
+    req = urllib.request.Request(json_url)
+    with urllib.request.urlopen(req) as res:
+        body = json.load(res)
+
+    return body
+
+def get_flayers (s:str) -> dict:
+    """
+    引数 s に指定された店舗のチラシデータを取得して dict に加工して返す
+    対象の s を増やしたい場合はここの中に増やす
+    現在 s として指定できるものは
+     - yorkmart
+     - meatmeet
+     - gyomusuper
+    の3種
+    チラシ情報の取得はそれぞれ別の関数に外だししている
+    """
+    flayers = {}
+
+    if s == "yorkmart":
+        flayers = get_flayers_york()
+    elif s == "meatmeet":
+        flayers = get_flayers_meatmeet()
+    elif s == "gyomusuper":
+        flayers = get_flayers_gyomusuper()
+    else:
+        return flayers
+
+    return flayers
+
+def get_flayers_york () -> dict:
     """
     ヨークマートのチラシ情報
     """
@@ -74,13 +105,11 @@ def york () -> dict:
     ret = {'updated_at':dt_now, 'flayers':yorkmart_flayers}
     return ret
 
-def meatmeet () -> dict:
+def get_flayers_meatmeet () -> dict:
     """
-    ミートミート木崎のチラシ情報
+    ミートミートのチラシ情報
     """
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    # 最新のチラシのファイル名を取得
 
     # チラシページURLを取得
     tokubai_url = 'https://tokubai.co.jp'
@@ -114,13 +143,11 @@ def meatmeet () -> dict:
     ret = {'updated_at':dt_now, 'flayers':leaflet_links}
     return ret
 
-def gyomusuper () -> dict:
+def get_flayers_gyomusuper () -> dict:
     """
     業務スーパー 浦和花月（関東）のチラシ
     """
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    # 最新のチラシのファイル名を取得
 
     # チラシページURLを取得
     tokubai_url = 'https://tokubai.co.jp'
@@ -155,6 +182,9 @@ def gyomusuper () -> dict:
     return ret
 
 
+###############
+# main
+###############
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     p = pathlib.Path(__file__).resolve().parent
@@ -166,15 +196,17 @@ def main():
     channel = config['flayers']['channel']
     channel_dev = config['flayers']['channel_dev']
 
+    # 取得対象とする店舗一覧
+    stores = ['yorkmart', 'meatmeet', 'gyomusuper']
+
     try:
         # 動作確認用
-        m = '[動作確認用] flayers.py を実行しました dt: ' + dt_now
+        m = '[debug] flayers.py を実行しました dt: ' + dt_now
         iw (webhook_dev, m)
         # 動作確認用ここまで
 
         SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
         OUTPUT_DIR = pathlib.Path(str(SCRIPT_DIR) + '/docs/flayer/')
-        stores = ['yorkmart', 'meatmeet', 'gyomusuper',  'supervalue']
         isNew = False
 
         ### 前回取得した情報 (latest.json) を再取得
@@ -182,118 +214,40 @@ def main():
 
         ### 店ごとの処理 ###
         for store in stores:
-            if store == 'yorkmart': # ヨークマート
-                print (store)
-                y = york ()
-                if set(y['flayers']) == set(pf['detail']['yorkmart']['flayers']):
-                    print (' -> flayers not renewed')
-                    text = '[動作確認用] ' + store + ' のチラシは更新されていませんでいした'
-                    iw (webhook_dev, text)
-                else:
-                    print (' -> got new flayers!')
-                    text = 'ヨークマート の新しいチラシを取得しました！'
-                    iw (webhook, text)
-                    iw (webhook_dev, text)
-                    pf['detail']['yorkmart'] = y
-                    isNew = True
-
-                    for flayer_url in y['flayers']:
-                        if flayer_url not in pf['detail']['yorkmart']['flayers']:
-                            # img ファイルを取得
-                            filename = flayer_url.split('/')[-1]
-                            comment = flayer_url
-                            dl (flayer_url, filename)
-
-                            # Slack へPOSTする
-                            ret = files_upload (token, channel, filename, comment)
-                            #ret = files_upload (token, channel_dev, filename, comment)
-                            if not ret.status_code == 200:
-                                time.sleep (61) # 61秒 sleep してリトライ
-                                ret = files_upload (token, channel, filename, comment)
-                                #ret = files_upload (token, channel_dev, filename, comment)
-                                if not ret.status_code == 200:
-                                    print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
-
-                            # ファイルをローカルから削除
-                            os.remove (filename)
-
-            elif store == 'meatmeet': # ミートミート
-                print (store)
-                m = meatmeet ()
-                if ('meatmeet' in pf['detail']) and set(m['flayers']) == set(pf['detail']['meatmeet']['flayers']):
-                    print (' -> flayers not renewed')
-                    text = '[動作確認用] ' + store + ' のチラシは更新されていませんでいした'
-                    iw (webhook_dev, text)
-                else:
-                    print (' -> got new flayers!')
-                    text = 'ミートミート木崎 の新しいチラシを取得しました！'
-                    iw (webhook, text)
-                    iw (webhook_dev, text)
-                    pf['detail']['meatmeet'] = m
-                    isNew = True
-
-                    # img ファイルを取得
-                    for flayer_url in m['flayers']:
-                        if flayer_url not in pf['detail']['meatmeet']['flayers']:
-                            # img ファイルを取得
-                            filename = flayer_url.split('/')[-1]
-                            comment = flayer_url
-                            dl (flayer_url, filename)
-
-                            # Slack へPOSTする
-                            ret = files_upload (token, channel, filename, comment)
-                            #ret = files_upload (token, channel_dev, filename, comment)
-                            if not ret.status_code == 200:
-                                time.sleep (61) # 61秒 sleep してリトライ
-                                ret = files_upload (token, channel, filename, comment)
-                                #ret = files_upload (token, channel_dev, filename, comment)
-                                if not ret.status_code == 200:
-                                    print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
-
-                            # ファイルをローカルから削除
-                            os.remove (filename)
-
-            elif store == 'supervalue': # スーパーバリュー
-                pass
-
-            elif store == 'gyomusuper' : # 業務スーパー
-                print (store)
-                gs = gyomusuper ()
-                if ('gyomusuper' in pf['detail']) and set(gs['flayers']) == set(pf['detail']['gyomusuper']['flayers']):
-                    print (' -> flayers not renewed')
-                    text = '[動作確認用] ' + store + ' のチラシは更新されていませんでいした'
-                    iw (webhook_dev, text)
-                else:
-                    print (' -> got new flayers!')
-                    text = '業務スーパー の新しいチラシを取得しました！'
-                    iw (webhook, text)
-                    iw (webhook_dev, text)
-                    pf['detail']['gyomusuper'] = gs
-                    isNew = True
-
-                    # img ファイルを取得
-                    for flayer_url in gs['flayers']:
+            print (store)
+            flayers = get_flayers(store)
+            if set(flayers['flayers']) == set(pf['detail'][store]['flayers']):
+                text = '[debug] ' + store + ' has no changed.'
+                print (text)
+                iw (webhook_dev, text)
+            else:
+                text = '[debug] ' + store + ' : got flayers info changes'
+                print (text)
+                iw (webhook_dev, text)
+                for flayer_url in flayers['flayers']:
+                    if flayer_url not in pf['detail'][store]['flayers']:
+                        # img ファイルを取得
                         filename = flayer_url.split('/')[-1]
                         comment = flayer_url
                         dl (flayer_url, filename)
 
                         # Slack へPOSTする
                         ret = files_upload (token, channel, filename, comment)
-                        #ret = files_upload (token, channel_dev, filename, comment)
+#                       ret = files_upload (token, channel_dev, filename, comment)
                         if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
                             ret = files_upload (token, channel, filename, comment)
-                            #ret = files_upload (token, channel_dev, filename, comment)
+#                           ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
-                                print ('[error] requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
-                        else:
-                            pass
-
+                                    print ('[debug] ' + 'requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
                         # ファイルをローカルから削除
                         os.remove (filename)
+                    else:
+                        pass
+                    # img ファイルの操作 ここまで
 
-            else:
-                pass
+                pf['detail'][store] = flayers
+                isNew = True
 
         if isNew:
             # ファイルを更新
@@ -314,6 +268,7 @@ def main():
     except Exception as e:
         err_msg = '```' + '[Exception]\n' + str(e) + '\n' + '[StackTrace]' + '\n' + traceback.format_exc() + '```'
         iw (webhook_dev, err_msg)
+
 
 if __name__ == '__main__':
     main ()
