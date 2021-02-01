@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210130_100002",
+    "updated_at": "20210201_100002",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -7,10 +7,10 @@
     ],
     "detail": {
         "yorkmart": {
-            "updated_at": "20210130_100003",
+            "updated_at": "20210201_100002",
             "flayers": [
-                "https://www.york-inc.com/ul-files/0130_202_A-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0130_202_B-scaled.jpg",
+                "https://www.york-inc.com/ul-files/0201_201_A-1-scaled.jpg",
+                "https://www.york-inc.com/ul-files/0201_201_B-1-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0110_202_A-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0110_202_B-scaled.jpg"
             ]
@@ -23,9 +23,9 @@
             ]
         },
         "gyomusuper": {
-            "updated_at": "20210111_103516",
+            "updated_at": "20210201_100014",
             "flayers": [
-                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3777659.jpg"
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3813531.jpg"
             ]
         }
     }
