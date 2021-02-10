@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210209_190001",
+    "updated_at": "20210210_100002",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -7,16 +7,12 @@
     ],
     "detail": {
         "yorkmart": {
-            "updated_at": "20210209_190002",
+            "updated_at": "20210210_100003",
             "flayers": [
                 "https://www.york-inc.com/ul-files/0210_201_A-2-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0210_201_B-2-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0210_202_A-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0210_202_B-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0206_201_A-1-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0206_201_B-1-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0110_202_A-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0110_202_B-scaled.jpg"
+                "https://www.york-inc.com/ul-files/0210_202_B-scaled.jpg"
             ]
         },
         "meatmeet": {
