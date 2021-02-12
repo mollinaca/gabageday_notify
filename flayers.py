@@ -13,6 +13,8 @@ import requests
 import urllib.request
 import git
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from PIL import Image
 
 def files_upload (token:str, channel:str, f:str, comment:str):
     """
@@ -48,6 +50,30 @@ def dl (url:str, title:str) -> str:
     urllib.request.urlretrieve(url,'{0}'.format(title))
     return title
 
+def get_concat_w (images:list):
+    """
+    画像を横に連結する
+    """
+    n = len(images)
+    im0 = Image.open(images[0])
+    ret = Image.new('RGB',(im0.width*n, im0.height))
+    for i,img in enumerate(images):
+        im = Image.open(img)
+        ret.paste(im, (im0.width*i, 0))
+    return ret
+
+def get_concat_h (images:list):
+    """
+    画像を縦に連結する
+    """
+    n = len(images)
+    im0 = Image.open(images[0])
+    ret = Image.new('RGB',(im0.width, im0.height*n))
+    for i,img in enumerate(images):
+        im = Image.open(img)
+        ret.paste(im, (0, im0.height*i))
+    return ret
+
 def prev_flayer () -> dict:
     """
     前回取得したチラシ情報を取得する
@@ -79,6 +105,8 @@ def get_flayers (s:str) -> dict:
         flayers = get_flayers_meatmeet()
     elif s == "gyomusuper":
         flayers = get_flayers_gyomusuper()
+    elif s == "welcia":
+        flayers = get_flayers_welcia()
     else:
         return flayers
 
@@ -145,7 +173,7 @@ def get_flayers_meatmeet () -> dict:
 
 def get_flayers_gyomusuper () -> dict:
     """
-    業務スーパー 浦和花月（関東）のチラシ
+    業務スーパー（関東）のチラシ
     """
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -181,6 +209,39 @@ def get_flayers_gyomusuper () -> dict:
     ret = {'updated_at':dt_now, 'flayers':leaflet_links}
     return ret
 
+def get_flayers_welcia () -> dict:
+    """
+    ウエルシアのチラシ
+    """
+    dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    # チラシページURLをリストで取得
+    shufoo_url = 'http://s-cmn.shufoo.net' 
+    welcia_url = shufoo_url + '/chirashi/298280/'
+    req = urllib.request.Request(welcia_url)
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
+    L = html.findAll(class_="list_ui list_ui_B")[0].findAll(class_='cF')
+    welcia_flayer_page_list = []
+    for l in L:
+        tmp_url = l.get('href')
+        tmp_url = shufoo_url + tmp_url
+        welcia_flayer_page_list.append(tmp_url)
+
+    req = urllib.request.Request(welcia_flayer_page_list[0])
+    with urllib.request.urlopen(req) as res:
+        body = res.read()
+    html = BeautifulSoup(body, "html.parser")
+    L = html.findAll(class_="list_ui list_ui_B")[0].findAll(class_='cF')
+    for l in L:
+        tmp_url = l.get('href')
+        tmp_url = shufoo_url + tmp_url
+        if not tmp_url in welcia_flayer_page_list:
+            welcia_flayer_page_list.append(tmp_url)
+
+    ret = {'updated_at':dt_now, 'flayers':welcia_flayer_page_list}
+    return ret
 
 ###############
 # main
@@ -197,7 +258,7 @@ def main():
     channel_dev = config['flayers']['channel_dev']
 
     # 取得対象とする店舗一覧
-    stores = ['yorkmart', 'meatmeet', 'gyomusuper']
+    stores = ['yorkmart', 'meatmeet', 'gyomusuper', 'welcia']
 
     try:
         # 動作確認用
@@ -216,7 +277,7 @@ def main():
         for store in stores:
             print (store)
             flayers = get_flayers(store)
-            if set(flayers['flayers']) == set(pf['detail'][store]['flayers']):
+            if (store in pf['detail']) and (set(flayers['flayers']) == set(pf['detail'][store]['flayers'])):
                 text = '[debug] ' + store + ' has no changed.'
                 print (text)
                 iw (webhook_dev, text)
@@ -225,19 +286,55 @@ def main():
                 print (text)
                 iw (webhook_dev, text)
                 for flayer_url in flayers['flayers']:
-                    if flayer_url not in pf['detail'][store]['flayers']:
+                    if (store not in pf['detail']) or (flayer_url not in pf['detail'][store]['flayers']):
                         # img ファイルを取得
-                        filename = flayer_url.split('/')[-1]
-                        comment = flayer_url
-                        dl (flayer_url, filename)
+                        if store == 'welcia': # そのままDLでは対応できないパターン
+                            # !!この処理がここにあるの絶対良くないから改めて直す!!
+                            # shufoo から バラバラ画像を取得して結合する
+                            p = flayer_url.split('/')[-2]
+                            filename = 'welcia_'+p+'.jpg'
+                            comment = flayer_url
+                            driver = webdriver.PhantomJS()
+                            driver.get(flayer_url)
+                            body = driver.page_source
+                            html = BeautifulSoup(body, "html.parser")
+                            sliceimg_url_list = []
+                            L = html.findAll(class_='cv_panel')[0].select('img')
+                            for l in L:
+                                sliceimg_url_list.append(l.get('src'))
+
+                            images = []
+                            for img_url in sliceimg_url_list:
+                                title = img_url.split('/')[-1]
+                                images.append(title)
+                                dl (img_url, title)
+
+                            images_left = []
+                            images_right = []
+                            for i,img in enumerate(images):
+                                if i%2 == 0:
+                                    images_left.append(img)
+                                else:
+                                    images_right.append(img)
+
+                            get_concat_h (images_left).save('left.jpg')
+                            get_concat_h (images_right).save('right.jpg')
+                            get_concat_w (['left.jpg','right.jpg']).save(filename)
+                            for img in images:
+                                os.remove(img)
+
+                        else:
+                            filename = flayer_url.split('/')[-1]
+                            comment = flayer_url
+                            dl (flayer_url, filename)
 
                         # Slack へPOSTする
                         ret = files_upload (token, channel, filename, comment)
-#                       ret = files_upload (token, channel_dev, filename, comment)
+#                        ret = files_upload (token, channel_dev, filename, comment)
                         if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
                             ret = files_upload (token, channel, filename, comment)
-#                           ret = files_upload (token, channel_dev, filename, comment)
+#                            ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
                                     print ('[debug] ' + 'requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
                         # ファイルをローカルから削除
