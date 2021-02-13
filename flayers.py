@@ -264,8 +264,9 @@ def main():
 
     try:
         # 動作確認用
-        m = '[debug] flayers.py を実行しました dt: ' + dt_now
-        iw (webhook_dev, m)
+        text = '[debug] flayers.py を実行しました dt: ' + dt_now
+        print (text)
+        # iw (webhook_dev, m)
         # 動作確認用ここまで
 
         SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
