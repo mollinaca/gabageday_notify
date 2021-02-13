@@ -334,11 +334,11 @@ def main():
 
                         # Slack へPOSTする
                         ret = files_upload (token, channel, filename, comment)
-#                        ret = files_upload (token, channel_dev, filename, comment)
+                        ret = files_upload (token, channel_dev, filename, comment)
                         if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
                             ret = files_upload (token, channel, filename, comment)
-#                            ret = files_upload (token, channel_dev, filename, comment)
+                            ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
                                     print ('[debug] ' + 'requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
                         # ファイルをローカルから削除
