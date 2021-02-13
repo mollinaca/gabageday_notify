@@ -248,6 +248,7 @@ def get_flayers_welcia () -> dict:
 ###############
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    sys.path.append("/usr/local/bin/")
     p = pathlib.Path(__file__).resolve().parent
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
@@ -320,6 +321,9 @@ def main():
                             get_concat_h (images_left).save('left.jpg')
                             get_concat_h (images_right).save('right.jpg')
                             get_concat_w (['left.jpg','right.jpg']).save(filename)
+
+                            os.remove('left.jpg')
+                            os.remove('right.jpg')
                             for img in images:
                                 os.remove(img)
 
