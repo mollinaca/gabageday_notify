@@ -260,6 +260,7 @@ def main():
 
     # 取得対象とする店舗一覧
     stores = ['yorkmart', 'meatmeet', 'gyomusuper', 'welcia']
+    stores_name = {'yorkmart':'ヨークマート', 'meatmeet':'ミートミート', 'gyomusuper':'業務スーパー', 'welcia':'ウエルシア'}
 
     try:
         # 動作確認用
@@ -281,10 +282,10 @@ def main():
             if (store in pf['detail']) and (set(flayers['flayers']) == set(pf['detail'][store]['flayers'])):
                 text = '[debug] ' + store + ' has no changed.'
                 print (text)
-                iw (webhook_dev, text)
             else:
                 text = '[debug] ' + store + ' : got flayers info changes'
                 print (text)
+                text = stores_name[store] + ' の新しいチラシを取得しました！'
                 iw (webhook_dev, text)
                 for flayer_url in flayers['flayers']:
                     if (store not in pf['detail']) or (flayer_url not in pf['detail'][store]['flayers']):
@@ -333,11 +334,11 @@ def main():
                             dl (flayer_url, filename)
 
                         # Slack へPOSTする
-                        ret = files_upload (token, channel, filename, comment)
+ #                       ret = files_upload (token, channel, filename, comment)
                         ret = files_upload (token, channel_dev, filename, comment)
                         if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-                            ret = files_upload (token, channel, filename, comment)
+  #                          ret = files_upload (token, channel, filename, comment)
                             ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
                                     print ('[debug] ' + 'requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
@@ -365,6 +366,10 @@ def main():
             commit_message = '[auto] update ' + str(OUTPUT_FILE_NAME)
             git_repo.index.commit(commit_message)
             git_repo.remotes.origin.push('HEAD')
+
+            # SlackにメッセージをPOST
+            text = '今回のチラシは以上です！'
+            iw (webhook_dev, text)
 
     except Exception as e:
         err_msg = '```' + '[Exception]\n' + str(e) + '\n' + '[StackTrace]' + '\n' + traceback.format_exc() + '```'
