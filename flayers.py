@@ -286,8 +286,6 @@ def main():
             else:
                 text = '[debug] ' + store + ' : got flayers info changes'
                 print (text)
-                text = stores_name[store] + ' の新しいチラシを取得しました！'
-                iw (webhook_dev, text)
                 for flayer_url in flayers['flayers']:
                     if (store not in pf['detail']) or (flayer_url not in pf['detail'][store]['flayers']):
                         # img ファイルを取得
