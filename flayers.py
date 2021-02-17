@@ -248,7 +248,7 @@ def get_flayers_welcia () -> dict:
 ###############
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    sys.path.append("/usr/local/bin/")
+    sys.path.append("/usr/local/bin")
     p = pathlib.Path(__file__).resolve().parent
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
@@ -266,7 +266,6 @@ def main():
         # 動作確認用
         text = '[debug] flayers.py を実行しました dt: ' + dt_now
         print (text)
-        # iw (webhook_dev, m)
         # 動作確認用ここまで
 
         SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
@@ -333,11 +332,9 @@ def main():
                             dl (flayer_url, filename)
 
                         # Slack へPOSTする
- #                       ret = files_upload (token, channel, filename, comment)
                         ret = files_upload (token, channel_dev, filename, comment)
                         if not ret.status_code == 200:
                             time.sleep (61) # 61秒 sleep してリトライ
-  #                          ret = files_upload (token, channel, filename, comment)
                             ret = files_upload (token, channel_dev, filename, comment)
                             if not ret.status_code == 200:
                                     print ('[debug] ' + 'requests response not <200 OK> ->', ret.headers['status'], filename, file=sys.stderr)
