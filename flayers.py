@@ -224,10 +224,15 @@ def get_flayers_welcia () -> dict:
     html = BeautifulSoup(body, "html.parser")
     L = html.findAll(class_="list_ui list_ui_B")[0].findAll(class_='cF')
     welcia_flayer_page_list = []
+    if not L:
+        ret = {'updated_at':dt_now, 'flayers':welcia_flayer_page_list}
+        return ret
+
     for l in L:
         tmp_url = l.get('href')
         tmp_url = shufoo_url + tmp_url
         welcia_flayer_page_list.append(tmp_url)
+
 
     req = urllib.request.Request(welcia_flayer_page_list[0])
     with urllib.request.urlopen(req) as res:
@@ -285,6 +290,7 @@ def main():
             else:
                 text = '[debug] ' + store + ' : got flayers info changes'
                 print (text)
+
                 for flayer_url in flayers['flayers']:
                     if (store not in pf['detail']) or (flayer_url not in pf['detail'][store]['flayers']):
                         # img ファイルを取得
@@ -362,10 +368,6 @@ def main():
             commit_message = '[auto] update ' + str(OUTPUT_FILE_NAME)
             git_repo.index.commit(commit_message)
             git_repo.remotes.origin.push('HEAD')
-
-            # SlackにメッセージをPOST
-            text = '今回のチラシは以上です！'
-            iw (webhook_dev, text)
 
     except Exception as e:
         err_msg = '```' + '[Exception]\n' + str(e) + '\n' + '[StackTrace]' + '\n' + traceback.format_exc() + '```'
