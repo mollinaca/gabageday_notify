@@ -248,7 +248,7 @@ def get_flayers_welcia () -> dict:
 ###############
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    sys.path.append("/usr/local/bin")
+    sys.path.append("/usr/local/bin/phantomjs")
     p = pathlib.Path(__file__).resolve().parent
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
