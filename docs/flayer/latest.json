@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210220_100002",
+    "updated_at": "20210223_114015",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -29,8 +29,12 @@
             ]
         },
         "welcia": {
-            "updated_at": "20210219_080803",
-            "flayers": []
+            "updated_at": "20210223_114018",
+            "flayers": [
+                "http://s-cmn.shufoo.net/chirashi/298280/47040423657138/?",
+                "http://s-cmn.shufoo.net/chirashi/298280/33113023609865/?",
+                "http://s-cmn.shufoo.net/chirashi/298280/92394323710060/?"
+            ]
         }
     }
 }
