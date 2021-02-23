@@ -253,7 +253,6 @@ def get_flayers_welcia () -> dict:
 ###############
 def main():
     dt_now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    sys.path.append("/usr/local/bin/phantomjs")
     p = pathlib.Path(__file__).resolve().parent
     config = configparser.ConfigParser()
     config.read(str(p)+'/setting.ini')
@@ -300,7 +299,7 @@ def main():
                             p = flayer_url.split('/')[-2]
                             filename = 'welcia_'+p+'.jpg'
                             comment = flayer_url
-                            driver = webdriver.PhantomJS()
+                            driver = webdriver.PhantomJS(executable_path='/usr/local/bin/phantomjs')
                             driver.get(flayer_url)
                             body = driver.page_source
                             html = BeautifulSoup(body, "html.parser")
