@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210228_190002",
+    "updated_at": "20210301_100001",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -7,12 +7,10 @@
     ],
     "detail": {
         "yorkmart": {
-            "updated_at": "20210228_190002",
+            "updated_at": "20210301_100002",
             "flayers": [
                 "https://www.york-inc.com/ul-files/0301_201_A-2-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0301_201_B-2-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0227_201_A-1-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0227_201_B-1-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0210_202_A-scaled.jpg",
                 "https://www.york-inc.com/ul-files/0210_202_B-scaled.jpg"
             ]
@@ -25,17 +23,17 @@
             ]
         },
         "gyomusuper": {
-            "updated_at": "20210223_121230",
+            "updated_at": "20210301_100003",
             "flayers": [
-                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3813531.jpg"
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3841799.jpg"
             ]
         },
         "welcia": {
-            "updated_at": "20210228_190013",
+            "updated_at": "20210301_100008",
             "flayers": [
+                "http://s-cmn.shufoo.net/chirashi/298280/92394323710060/?",
                 "http://s-cmn.shufoo.net/chirashi/298280/47040423657138/?",
-                "http://s-cmn.shufoo.net/chirashi/298280/33113023609865/?",
-                "http://s-cmn.shufoo.net/chirashi/298280/92394323710060/?"
+                "http://s-cmn.shufoo.net/chirashi/298280/37174623802166/?"
             ]
         }
     }
