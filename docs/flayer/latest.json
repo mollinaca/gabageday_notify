@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210309_190002",
+    "updated_at": "20210310_100002",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -7,14 +7,10 @@
     ],
     "detail": {
         "yorkmart": {
-            "updated_at": "20210309_190002",
+            "updated_at": "20210310_100002",
             "flayers": [
                 "https://www.york-inc.com/ul-files/0310_201_A-2-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0310_201_B-2-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0306_201_A-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0306_201_B-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0210_202_A-scaled.jpg",
-                "https://www.york-inc.com/ul-files/0210_202_B-scaled.jpg"
+                "https://www.york-inc.com/ul-files/0310_201_B-2-scaled.jpg"
             ]
         },
         "meatmeet": {
@@ -31,10 +27,11 @@
             ]
         },
         "welcia": {
-            "updated_at": "20210308_100005",
+            "updated_at": "20210310_100004",
             "flayers": [
+                "http://s-cmn.shufoo.net/chirashi/298280/38388623857683/?",
                 "http://s-cmn.shufoo.net/chirashi/298280/37174623802166/?",
-                "http://s-cmn.shufoo.net/chirashi/298280/38388623857683/?"
+                "http://s-cmn.shufoo.net/chirashi/298280/97116123867838/?"
             ]
         }
     }
