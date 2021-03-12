@@ -1,5 +1,5 @@
 {
-    "updated_at": "20210310_100002",
+    "updated_at": "20210312_190002",
     "stores": [
         "yorkmart",
         "meetmeet",
@@ -14,10 +14,12 @@
             ]
         },
         "meatmeet": {
-            "updated_at": "20210306_100002",
+            "updated_at": "20210312_190003",
             "flayers": [
                 "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3881727.jpg",
-                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3881730.jpg"
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3881730.jpg",
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3899546.jpg",
+                "https://image.tokubai.co.jp/images/bargain_office_leaflets/o=true/3899549.jpg"
             ]
         },
         "gyomusuper": {
