@@ -14,21 +14,24 @@ p = pathlib.Path(__file__).resolve().parent
 config = configparser.ConfigParser()
 config.read(str(p) + "/setting.ini")
 webhook = config["furikomi_remainder"]["webhook"]
-yurichan_okodukai = config["furikomi_remainder"]["yurichan_okodukai"]
-kaechan_okodukai = config["furikomi_remainder"]["kaechan_okodukai"]
+yurichan_okodukai = int(config["furikomi_remainder"]["yurichan_okodukai"])
+kaechan_okodukai = int(config["furikomi_remainder"]["kaechan_okodukai"])
 
 today = datetime.datetime.now().day
+today = 15
 if today != 15:
     print("今日は15日ではないのです。")
     exit(0)
 
-
 # Post to slack
 message = (
-    "15日です。お金を振り込みましょう。金額は ゆりちゃん: "
-    + yurichan_okodukai
-    + "かえちゃん: "
-    + kaechan_okodukai
+    "15日です。お金を振り込みましょう。金額は \n"
+    + "ゆりちゃん: ￥"
+    + str("{:,}".format(yurichan_okodukai))
+    + "\n"
+    + "かえちゃん: ￥"
+    + str("{:,}".format(kaechan_okodukai))
+    + "\n"
     + " です"
 )
 url = webhook
