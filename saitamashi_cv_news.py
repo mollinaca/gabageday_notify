@@ -19,12 +19,14 @@ def get_latest_news() -> dict:
     ret = {}
     url = "https://saitama-vaccine.com/"
     res = requests.get(url)
-    html = BeautifulSoup(res.content, "html.parser")
-    news = html.find_all(class_="news")[0].find_all("dl")
-    latest_news = news[0]
-    latest_news_date = latest_news.find("dt").text
-    latest_news_obj = latest_news.find("dd").text
-    ret = {"latest_news_date": latest_news_date, "latest_news_obj": latest_news_obj}
+    if res.status_code == requests.codes.ok:
+        html = BeautifulSoup(res.content, "html.parser")
+        news = html.find_all(class_="news")[0].find_all("dl")
+        latest_news = news[0]
+        latest_news_date = latest_news.find("dt").text
+        latest_news_obj = latest_news.find("dd").text
+        ret = {"latest_news_date": latest_news_date, "latest_news_obj": latest_news_obj}
+
     return ret
 
 
@@ -71,9 +73,14 @@ def main():
     config = configparser.ConfigParser()
     config.read(CONFIG_FILE)
     webhook = config["garbage_notify"]["webhook"]
-    webhook_dev = config["garbage_notify"]["webhook_dev"]
+    # webhook_dev = config["garbage_notify"]["webhook_dev"]
 
     latest_news = get_latest_news()
+    if not latest_news:
+        message = "requests.status_code is not ok"
+        post_message(webhook, message)
+        exit()
+
     latest_news_date = latest_news["latest_news_date"]
     latest_news_obj = latest_news["latest_news_obj"]
 
