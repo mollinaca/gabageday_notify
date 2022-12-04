@@ -7,6 +7,7 @@ https://saitama-vaccine.com/
 import configparser
 import json
 import os
+import pathlib
 import requests
 import urllib.request
 from bs4 import BeautifulSoup
@@ -69,7 +70,8 @@ def post_message(webhook: str, message: str):
 
 
 def main():
-    CONFIG_FILE = "setting.ini"
+    p = pathlib.Path(__file__).resolve().parent
+    CONFIG_FILE = str(p) + "/setting.ini"
     config = configparser.ConfigParser()
     config.read(CONFIG_FILE)
     webhook = config["garbage_notify"]["webhook"]
